@@ -24,10 +24,10 @@ function InjectCopyMsgIdBtn() {
     let copyMsgIdItem: Element | null = <Element>menu.querySelector("[aria-hidden=false]");
     if (!copyMsgIdItem) return;
     const clone = copyMsgIdItem.cloneNode(true);
+    menu.appendChild(clone);
 
     setMenuItemProps(clone);
     setMenuItemListeners(clone);
-    menu.appendChild(clone);
 }
 
 function setMenuItemProps(menuItem: Node) {
@@ -54,7 +54,8 @@ function setMenuItemListeners(menuItem: Node) {
     item.addEventListener("mouseout", () => item.classList.remove("J-N-JT"));
     item.addEventListener("click", () => {
         let msgId = "";
-
+        const menu = item.parentElement;
+        if (menu) menu.style.display = "none";
         (async () => {
             msgId = await getMsgId();
 
@@ -135,14 +136,6 @@ function fallbackCopyTextToClipboard(text: string) {
     textArea.focus();
     textArea.select();
 
-    try {
-        var successful = document.execCommand('copy');
-        var msg = successful ? 'successful' : 'unsuccessful';
-        console.log('Fallback: Copying text command was ' + msg);
-    } catch (err) {
-        console.error('Fallback: Oops, unable to copy', err);
-    }
-
     document.body.removeChild(textArea);
 }
 
@@ -152,10 +145,9 @@ function copyTextToClipboard(text: string) {
         return;
     }
     navigator.clipboard.writeText(text).then(function () {
-        console.log('Async: Copying to clipboard was successful!');
     }, function (err) {
         console.error('Async: Could not copy text: ', err);
     });
 }
 
-export {}
+export { }
