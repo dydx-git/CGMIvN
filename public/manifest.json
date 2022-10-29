@@ -1,0 +1,16 @@
+{
+    "manifest_version": 3,
+    "name": "Copy Gmail Message-Id",
+    "version": "1.0",
+    "description": "Copies the Message-Id of a message in the new Gmail",
+    "content_scripts": [
+        {
+            "js": [
+                "src/content.ts"
+            ],
+            "matches": [
+                "https://mail.google.com/mail/u/*"
+            ]
+        }
+    ]
+}
