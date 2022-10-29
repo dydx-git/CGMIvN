@@ -9,6 +9,9 @@
         "48": "public/icons/icon48.ico",
         "128": "public/icons/icon128.ico"
     },
+    "browser_action": {
+        "default_icon": "public/icons/icon16.ico"
+    },
     "content_scripts": [
         {
             "js": [
