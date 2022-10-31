@@ -13,7 +13,10 @@ var obs = new MutationObserver(function (mutations) {
             }
         }
     }
-    menuBtns.map(btn => btn.addEventListener("click", InjectCopyMsgIdBtn))
+    menuBtns.map(btn => {
+        btn.addEventListener("mouseover", InjectCopyMsgIdBtn);
+        btn.addEventListener("click", InjectCopyMsgIdBtn);
+    });
 });
 obs.observe(document.body, { childList: true, subtree: true, attributes: false, characterData: false });
 
@@ -24,7 +27,7 @@ function InjectCopyMsgIdBtn() {
         return;
     }
     if (btnInjectedAlready(menu)) {
-        console.info("button injected already");
+        // console.info("button injected already");
         return;
     }
     let copyMsgIdItem: Element | null = <Element>menu.querySelector("[aria-hidden=false]");
@@ -95,8 +98,14 @@ async function getMsgId() {
 
 function buildUrl(): string {
     const msgId = document.querySelector('[data-message-id]')?.getAttribute('data-message-id')?.replace('#', '');
-    const ikValue = document.querySelector('[data-inboxsdk-ik-value]')?.getAttribute('data-inboxsdk-ik-value');
+    let ikValue = document.querySelector('[data-inboxsdk-ik-value]')?.getAttribute('data-inboxsdk-ik-value');
+    if (!ikValue)
+        ikValue = fallbackGetIkValue();
+    
     if (!msgId || !ikValue) {
+        console.log(msgId);
+        console.log(ikValue);
+        
         console.error("Could not find message id or ik value");
         return "";
     }
@@ -140,6 +149,24 @@ async function makeRequest(url: string): Promise<string> {
     }
     console.error("Could not get message id");
     return "";
+}
+
+function fallbackGetIkValue() : string|null {
+    const html = document.documentElement.innerHTML;
+    const start = html.indexOf('GM_ID_KEY');
+    const end = html.indexOf(';', start);
+    const ikValue = html.substring(start, end + 1);
+    if (!eval) {
+        return null;
+    }
+    return getValueFromAssignment(ikValue);
+}
+
+function getValueFromAssignment(assignment: string): string {
+    const start = assignment.indexOf('=');
+    const end = assignment.indexOf(';', start);
+    const result = assignment.substring(start + 1, end);
+    return result.replaceAll('"', '');
 }
 
 function fallbackCopyTextToClipboard(text: string) {
