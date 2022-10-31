@@ -19,10 +19,19 @@ obs.observe(document.body, { childList: true, subtree: true, attributes: false, 
 
 function InjectCopyMsgIdBtn() {
     const menu: Element | null = document.querySelector("[role=presentation] [role=menu]");
-    if (!menu) return;
-    if (btnInjectedAlready(menu)) return;
+    if (!menu) {
+        console.info("No menu found");
+        return;
+    }
+    if (btnInjectedAlready(menu)) {
+        console.info("button injected already");
+        return;
+    }
     let copyMsgIdItem: Element | null = <Element>menu.querySelector("[aria-hidden=false]");
-    if (!copyMsgIdItem) return;
+    if (!copyMsgIdItem) {
+        console.info("could not clone any menu button");
+        return;
+    }
     const clone = copyMsgIdItem.cloneNode(true);
     menu.appendChild(clone);
 
@@ -87,7 +96,10 @@ async function getMsgId() {
 function buildUrl(): string {
     const msgId = document.querySelector('[data-message-id]')?.getAttribute('data-message-id')?.replace('#', '');
     const ikValue = document.querySelector('[data-inboxsdk-ik-value]')?.getAttribute('data-inboxsdk-ik-value');
-    if (!msgId || !ikValue) return "";
+    if (!msgId || !ikValue) {
+        console.error("Could not find message id or ik value");
+        return "";
+    }
 
     let urlStr: string = "";
     const bases = document.getElementsByTagName('base');
@@ -98,7 +110,10 @@ function buildUrl(): string {
             break;
         }
     }
-    if (!urlStr) return "";
+    if (!urlStr) {
+        console.error("Could not find base url");
+        return "";
+    }
 
     const url = new URL(urlStr);
     url.searchParams.append('ik', ikValue);
@@ -109,7 +124,10 @@ function buildUrl(): string {
 }
 
 async function makeRequest(url: string): Promise<string> {
-    if (!url) return "";
+    if (!url) {
+        console.error("url is null");
+        return "";
+    }
 
     var response = await fetch(url);
     switch (response.status) {
@@ -117,9 +135,10 @@ async function makeRequest(url: string): Promise<string> {
             var template = await response.text();
             return template;
         case 404:
-            console.log('Not Found');
+            console.error('Not Found');
             break;
     }
+    console.error("Could not get message id");
     return "";
 }
 
