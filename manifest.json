@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Copy Gmail Message-Id",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "Copies the Message-Id of a message in the new Gmail UI",
     "icons": {
         "16": "public/icons/icon16.ico",
