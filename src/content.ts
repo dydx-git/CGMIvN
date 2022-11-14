@@ -1,4 +1,5 @@
 const menuBtns: Element[] = [];
+let clickedBtn: Element | null = null;
 
 var obs = new MutationObserver(function (mutations) {
     for (let i = 0; i < mutations.length; i++) {
@@ -20,8 +21,10 @@ var obs = new MutationObserver(function (mutations) {
 });
 obs.observe(document.body, { childList: true, subtree: true, attributes: false, characterData: false });
 
-function InjectCopyMsgIdBtn() {
+function InjectCopyMsgIdBtn(event: Event) {
     const menu: Element | null = document.querySelector("[role=presentation] [role=menu]");
+    clickedBtn = event.target as Element;
+
     if (!menu) {
         console.info("No menu found");
         return;
@@ -97,7 +100,9 @@ async function getMsgId() {
 }
 
 function buildUrl(): string {
-    const msgId = document.querySelector('[data-message-id]')?.getAttribute('data-message-id')?.replace('#', '');
+    let msgIdElem = clickedBtn?.parentElement?.closest("[data-message-id]") ?? document.querySelector('[data-message-id]');
+    const msgId = msgIdElem?.getAttribute('data-message-id')?.replace('#', '');
+
     let ikValue = document.querySelector('[data-inboxsdk-ik-value]')?.getAttribute('data-inboxsdk-ik-value');
     if (!ikValue)
         ikValue = fallbackGetIkValue();
