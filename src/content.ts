@@ -29,6 +29,7 @@ function InjectCopyMsgIdBtn(event: Event) {
         console.info("No menu found");
         return;
     }
+
     if (btnInjectedAlready(menu)) {
         // console.info("button injected already");
         return;
@@ -73,7 +74,7 @@ function setMenuItemListeners(menuItem: Node) {
         if (menu) menu.style.display = "none";
         (async () => {
             msgId = await getMsgId();
-
+            
             if (msgId) copyTextToClipboard(msgId);
         })();
     });
@@ -96,6 +97,11 @@ async function getMsgId() {
     const parser = new DOMParser();
     const html = parser.parseFromString(htmlTxt, 'text/html');
     const msgId = html.querySelector('.message_id')?.textContent;
+    
+    if (!msgId) {
+        console.error("Could not find message id after request");
+        return "";
+    }
     return `rfc822msgid:${msgId}`;
 }
 
@@ -106,11 +112,8 @@ function buildUrl(): string {
     let ikValue = document.querySelector('[data-inboxsdk-ik-value]')?.getAttribute('data-inboxsdk-ik-value');
     if (!ikValue)
         ikValue = fallbackGetIkValue();
-    
+
     if (!msgId || !ikValue) {
-        console.log(msgId);
-        console.log(ikValue);
-        
         console.error("Could not find message id or ik value");
         return "";
     }
@@ -156,7 +159,7 @@ async function makeRequest(url: string): Promise<string> {
     return "";
 }
 
-function fallbackGetIkValue() : string|null {
+function fallbackGetIkValue(): string | null {
     const html = document.documentElement.innerHTML;
     const start = html.indexOf('GM_ID_KEY');
     const end = html.indexOf(';', start);
@@ -198,7 +201,44 @@ function copyTextToClipboard(text: string) {
     navigator.clipboard.writeText(text).then(function () {
     }, function (err) {
         console.error('Async: Could not copy text: ', err);
+        return;
     });
+
+    triggerNotification();
+}
+
+function triggerNotification() {
+    const notificationParent: HTMLElement | null = document.querySelector('[role="alert"]');
+    if (!notificationParent) {
+        console.error("Could not find notification parent");
+        return;
+    }
+
+    if (notificationParent.classList.contains('bAp')) {
+        console.log("Notification already triggered");
+        return;
+    }
+
+    const parentStyle = notificationParent.style.cssText;
+    notificationParent.style.cssText = "";
+    notificationParent.classList.toggle("bAp");
+
+    const notification: HTMLElement | null = notificationParent.querySelector('.vh');
+    if (!notification) {
+        console.error("Could not find notification");
+        return;
+    }
+
+    notification.innerHTML = `<span class="bAq">Message ID copied to clipboard.</span>`;
+    setTimeout(() => {
+        removeNotification(notificationParent, notification, parentStyle);
+    }, 3000);
+}
+
+function removeNotification(notificationParent: HTMLElement, notification: HTMLElement, parentStyle: string) {
+    notificationParent.classList.toggle("bAp");
+    notificationParent.style.cssText = parentStyle;
+    notification.innerHTML = "";
 }
 
 export { }
